@@ -18,6 +18,7 @@ public class BallController : MonoBehaviour {
     public LineRenderer LineToCatapult;
     public LineRenderer LineToCatapultFront;
     public Transform CatapultFront;
+    public float cameraFixLimit;
 
 
     private void OnMouseDown()
@@ -71,16 +72,27 @@ public class BallController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if(isDragging)
+
+        if (isDragging)
         {
-            UpdateBallPosition();
+            updateBallPosition();
         }
 
+        if(spring == null)
+        {
+            updateCameraPosition();
+
+            if(Mathf.Approximately(rigidbody.velocity.x, 0.0f))
+            {
+                Debug.Log("Stop");
+            }
+            
+        }
         
         setLineRendererPosition();
     }
 
-    void UpdateBallPosition()
+    void updateBallPosition()
     {
         mousePosition = MainCamera.ScreenToWorldPoint(Input.mousePosition); 
         Vector2 catapultToMouse = mousePosition - catapult.position;
@@ -117,5 +129,26 @@ public class BallController : MonoBehaviour {
         LineToCatapultFront.SetPosition(0, lineFrontPosStart);
         LineToCatapultFront.SetPosition(1, linePosEnd);
         LineToCatapultFront.SetPosition(2, linePosBallEnd);
+    }
+
+    void updateCameraPosition()
+    {
+        Vector3 currentBallPosition = this.gameObject.transform.position;
+        Vector3 currentCamPosition = MainCamera.transform.position;
+        if(currentBallPosition.x >= currentCamPosition.x)
+        {
+            Vector3 adjustCamPosition;
+            if (currentBallPosition.x >= cameraFixLimit)
+            {
+                adjustCamPosition = new Vector3(cameraFixLimit, currentCamPosition.y, currentCamPosition.z);
+            }
+            else
+            {
+                adjustCamPosition = new Vector3(currentBallPosition.x, currentCamPosition.y, currentCamPosition.z);
+
+            }
+
+            MainCamera.transform.position = adjustCamPosition;
+        } 
     }
 }
