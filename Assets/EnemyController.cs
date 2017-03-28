@@ -5,6 +5,9 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour {
 
     private bool isDied = false;
+    public ParticleSystem BloodParticle;
+    public Camera MainCamera;
+    
 
 	// Use this for initialization
 	void Start () {
@@ -18,7 +21,7 @@ public class EnemyController : MonoBehaviour {
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if(collision.gameObject.layer == LayerMask.NameToLayer("Ball"))
+        if(collision.gameObject.layer == LayerMask.NameToLayer("Ball") || collision.gameObject.tag == "Obstacle")
         {
             BirdDied();
         }
@@ -29,5 +32,12 @@ public class EnemyController : MonoBehaviour {
         Debug.Log("Died");
         this.gameObject.SetActive(false);
         isDied = true;
+
+        BloodParticle.gameObject.transform.position = this.gameObject.transform.position;
+        BloodParticle.gameObject.SetActive(true);
+
+        MainCamera.gameObject.GetComponent<CameraController>().ResetCamera();
+        
+
     }
 }

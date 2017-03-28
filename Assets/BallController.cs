@@ -9,7 +9,8 @@ public class BallController : MonoBehaviour {
     private Transform catapult;
     private Rigidbody2D rigidbody;
     private Ray ray;
-    
+    private bool isCameraReachEnd = false;
+
     private Vector3 mousePosition;
 
     public Camera MainCamera;
@@ -19,7 +20,6 @@ public class BallController : MonoBehaviour {
     public LineRenderer LineToCatapultFront;
     public Transform CatapultFront;
     public float cameraFixLimit;
-
 
     private void OnMouseDown()
     {
@@ -80,11 +80,22 @@ public class BallController : MonoBehaviour {
 
         if(spring == null)
         {
-            updateCameraPosition();
+            if(!isCameraReachEnd)
+            {
+                updateCameraPosition();
+            }
+            
 
             if(Mathf.Approximately(rigidbody.velocity.x, 0.0f))
             {
                 Debug.Log("Stop");
+                isCameraReachEnd = true;
+                CameraController CamScript = MainCamera.gameObject.GetComponent<CameraController>();
+                if(!CamScript.isCameraReseting())
+                {
+                    Debug.Log("RESET");
+                    CamScript.ResetCamera();
+                }
             }
             
         }
@@ -113,8 +124,6 @@ public class BallController : MonoBehaviour {
 
     void setLineRendererPosition()
     {
-        
-
         Vector3 linePosStart = new Vector3(catapult.position.x, catapult.position.y, 0);
         Vector3 linePosEnd = new Vector3(this.gameObject.transform.position.x, this.gameObject.transform.position.y, 0);
         Vector3 CatapultFrontPos = CatapultFront.position;
@@ -141,6 +150,7 @@ public class BallController : MonoBehaviour {
             if (currentBallPosition.x >= cameraFixLimit)
             {
                 adjustCamPosition = new Vector3(cameraFixLimit, currentCamPosition.y, currentCamPosition.z);
+                isCameraReachEnd = true;
             }
             else
             {
