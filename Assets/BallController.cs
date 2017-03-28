@@ -122,7 +122,7 @@ public class BallController : MonoBehaviour {
 
         Ray BallRay = new Ray(this.gameObject.transform.position, Vector3.zero);
         BallRay.direction = this.gameObject.transform.position - CatapultFrontPos;
-        Vector3 linePosBallEnd = BallRay.GetPoint((this.gameObject.GetComponent<CircleCollider2D>().radius)*0.8f);
+		Vector3 linePosBallEnd = BallRay.GetPoint((this.gameObject.GetComponent<CircleCollider2D>().radius)* this.gameObject.transform.localScale.x);
 
         LineToCatapult.SetPosition(0, linePosStart);
         LineToCatapult.SetPosition(1, linePosEnd);
