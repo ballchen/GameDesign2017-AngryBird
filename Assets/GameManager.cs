@@ -38,7 +38,7 @@ public class GameManager : MonoBehaviour
 
     public void ResetStage()
     {
-        life = 3;
+        life = 4;
     }
 
     public void UpdateLife(int delta)
@@ -71,16 +71,15 @@ public class GameManager : MonoBehaviour
     public void NextStage()
     {
         ResetStage();
+
         if (currentStage == 1)
         {
             StartCoroutine(WaitBulletFly());
         }
         else if (currentStage == 2)
         {
-            SetAllinActive();
+            
             //Win
-
-          
             StartCoroutine(WaitForEndScene("Win"));
         }
     }
