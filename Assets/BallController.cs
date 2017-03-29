@@ -10,6 +10,9 @@ public class BallController : MonoBehaviour {
     private Rigidbody2D rigidbody;
     private Ray ray;
     private bool isCameraReachEnd = false;
+    private Rigidbody2D BallShouldConnect;
+    private bool hasHitObstable = false;
+    private bool isWaiting = false;
 
     private Vector3 mousePosition;
 
@@ -18,16 +21,16 @@ public class BallController : MonoBehaviour {
     public Material LineMaterial;
     public LineRenderer LineToCatapult;
     public LineRenderer LineToCatapultFront;
+    
     public Transform CatapultFront;
     public float cameraFixLimit;
+    public GameObject GameData;
 
     private void OnMouseDown()
     {
         isDragging = true;
         rigidbody.gravityScale = 1;
         rigidbody.isKinematic = false;
-
-
     }
 
     private void OnMouseUp()
@@ -37,6 +40,18 @@ public class BallController : MonoBehaviour {
         Destroy(spring);
         LineToCatapult.enabled = false;
         LineToCatapultFront.enabled = false;
+        catapult.gameObject.GetComponent<AudioSource>().Play();
+
+
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if(collision.gameObject.tag == "Obstacle")
+        {
+            this.gameObject.GetComponent<AudioSource>().Play();
+            hasHitObstable = true;
+        }
         
     }
 
@@ -51,8 +66,7 @@ public class BallController : MonoBehaviour {
         rigidbody.isKinematic = true;
         catapult = spring.connectedBody.transform;
         ray = new Ray(catapult.position, Vector3.zero);
-
-
+        BallShouldConnect = spring.connectedBody;
     }
 
     void LineRendererSetup()
@@ -84,23 +98,53 @@ public class BallController : MonoBehaviour {
             {
                 updateCameraPosition();
             }
-            
 
-            if(Mathf.Approximately(rigidbody.velocity.x, 0.0f))
+            if((this.gameObject.transform.position.x > 45) || (rigidbody.velocity.x <= 0.05f && rigidbody.velocity.y <= 0.05f))
             {
-                Debug.Log("Stop");
-                isCameraReachEnd = true;
-                CameraController CamScript = MainCamera.gameObject.GetComponent<CameraController>();
-                if(!CamScript.isCameraReseting())
+                if(!hasHitObstable)
                 {
-                    Debug.Log("RESET");
-                    CamScript.ResetCamera();
+                    isCameraReachEnd = true;
+                    CameraController CamScript = MainCamera.gameObject.GetComponent<CameraController>();
+                    if (!CamScript.isCameraReseting())
+                    {
+                        Debug.Log("RESET");
+                        CamScript.ResetCamera();
+                        isCameraReachEnd = false;
+                        ResetBall();
+                    }
                 }
+                else
+                {
+                    if (!isWaiting)
+                    {
+                            StartCoroutine(WaitBulletFly());
+                    }
+                }
+                
             }
+
+            
             
         }
         
         setLineRendererPosition();
+    }
+
+    IEnumerator WaitBulletFly()
+    {
+        isWaiting = true;
+        yield return new WaitForSeconds(5);
+       
+        isCameraReachEnd = true;
+        CameraController CamScript = MainCamera.gameObject.GetComponent<CameraController>();
+        
+        if (!CamScript.isCameraReseting() && GameObject.Find("Enemy") != null)
+        {
+            Debug.Log("RESET");
+            CamScript.ResetCamera();
+            isCameraReachEnd = false;
+            ResetBall();
+        }
     }
 
     void updateBallPosition()
@@ -108,7 +152,6 @@ public class BallController : MonoBehaviour {
         mousePosition = MainCamera.ScreenToWorldPoint(Input.mousePosition); 
         Vector2 catapultToMouse = mousePosition - catapult.position;
         mousePosition.z = this.gameObject.transform.position.z;
-        
 
         float dist = Vector3.Distance(mousePosition, catapult.position);
         
@@ -160,5 +203,55 @@ public class BallController : MonoBehaviour {
 
             MainCamera.transform.position = adjustCamPosition;
         } 
+    }
+
+    Component CopyComponent(Component original, GameObject destination)
+    {
+        System.Type type = original.GetType();
+        Component copy = destination.AddComponent(type);
+        // Copied fields can be restricted with BindingFlags
+        System.Reflection.FieldInfo[] fields = type.GetFields();
+        foreach (System.Reflection.FieldInfo field in fields)
+        {
+            field.SetValue(copy, field.GetValue(original));
+        }
+        return copy;
+    }
+
+
+    public void ResetBall()
+    {
+        Reset();
+        GameData.gameObject.GetComponent<GameManager>().UpdateLife(-1);
+    }
+
+    private void Reset()
+    {
+        isCameraReachEnd = false;
+        hasHitObstable = false;
+        isWaiting = false;
+
+        // reset spring
+        if (spring == null)
+        {
+            spring = this.gameObject.AddComponent<SpringJoint2D>();
+            spring.connectedBody = BallShouldConnect;
+            spring.anchor = Vector2.zero;
+            spring.connectedAnchor = new Vector2(3.123283e-07f, 6.35783e-09f);
+            spring.distance = 0.2f;
+            spring.dampingRatio = 0;
+            spring.frequency = 0.75f;
+            spring.autoConfigureDistance = false;
+        }
+
+        //reset ball
+        this.gameObject.transform.position = new Vector3(-5.897f, -1.21f, 0);
+        rigidbody.gravityScale = 0;
+        rigidbody.isKinematic = true;
+        rigidbody.velocity = Vector3.zero;
+        rigidbody.angularVelocity = 0;
+
+        LineToCatapult.enabled = true;
+        LineToCatapultFront.enabled = true;
     }
 }

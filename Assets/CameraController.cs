@@ -18,13 +18,13 @@ public class CameraController : MonoBehaviour {
         if (isReseting)
         {       
             this.gameObject.transform.position = Vector3.MoveTowards(this.gameObject.transform.position, targetPosition, step);
-        }
 
-        if(Vector3.Distance(transform.position, targetPosition) < 0.1f)
-        {
-            isReseting = false;
-        }
-        
+            if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
+            {
+                Debug.Log("Camera reseted");
+                isReseting = false;
+            }
+        }        
     }
 
     public void ResetCamera()

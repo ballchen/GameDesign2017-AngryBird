@@ -7,6 +7,7 @@ public class EnemyController : MonoBehaviour {
     private bool isDied = false;
     public ParticleSystem BloodParticle;
     public Camera MainCamera;
+    public GameObject GameData;
     
 
 	// Use this for initialization
@@ -37,7 +38,6 @@ public class EnemyController : MonoBehaviour {
         BloodParticle.gameObject.SetActive(true);
 
         MainCamera.gameObject.GetComponent<CameraController>().ResetCamera();
-        
-
+        GameData.gameObject.GetComponent<GameManager>().NextStage();
     }
 }
