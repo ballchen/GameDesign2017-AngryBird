@@ -28,21 +28,25 @@ public class BallController : MonoBehaviour {
 
     private void OnMouseDown()
     {
-        isDragging = true;
-        rigidbody.gravityScale = 1;
-        rigidbody.isKinematic = false;
+		if (spring != null) {
+			isDragging = true;
+			LineToCatapult.enabled = true;
+			LineToCatapultFront.enabled = true;
+			rigidbody.gravityScale = 1;
+			rigidbody.isKinematic = false;
+		}
     }
 
     private void OnMouseUp()
     {
-        isDragging = false;
+		if (spring != null) {
+			isDragging = false;
 
-        Destroy(spring);
-        LineToCatapult.enabled = false;
-        LineToCatapultFront.enabled = false;
-        catapult.gameObject.GetComponent<AudioSource>().Play();
-
-
+			Destroy(spring);
+			LineToCatapult.enabled = false;
+			LineToCatapultFront.enabled = false;
+			catapult.gameObject.GetComponent<AudioSource>().Play();
+		}
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -251,7 +255,5 @@ public class BallController : MonoBehaviour {
         rigidbody.velocity = Vector3.zero;
         rigidbody.angularVelocity = 0;
 
-        LineToCatapult.enabled = true;
-        LineToCatapultFront.enabled = true;
     }
 }

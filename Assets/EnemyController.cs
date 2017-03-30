@@ -34,6 +34,7 @@ public class EnemyController : MonoBehaviour {
         this.gameObject.SetActive(false);
         isDied = true;
 
+		BloodParticle.gameObject.SetActive(false);
         BloodParticle.gameObject.transform.position = this.gameObject.transform.position;
         BloodParticle.gameObject.SetActive(true);
 
